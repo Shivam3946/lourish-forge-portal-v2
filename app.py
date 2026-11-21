@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from models import (
     db, User, PasswordOTP, Attendance, TestScore,
     StudyMaterial, DoubtTicket, QuestionBank, Notice,
-    OnlineExam, ExamMCQ, ExamAttempt
+    OnlineExam, ExamMCQ, ExamAttempt, FeeRecord
 )
 
 app = Flask(__name__)
@@ -38,6 +38,12 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 CLASSES_7_TO_12 = ['Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12']
+MONTH_OPTIONS = [
+    'January 2026', 'February 2026', 'March 2026', 'April 2026',
+    'May 2026', 'June 2026', 'July 2026', 'August 2026',
+    'September 2026', 'October 2026', 'November 2026', 'December 2026',
+    'January 2027', 'February 2027', 'March 2027'
+]
 NCERT_OFFICIAL_LINKS = [
     {"class_name": "Class 8", "title": "NCERT Official Textbooks - Class 8", "url": "https://ncert.nic.in/textbook.php?hesc1=0-13"},
     {"class_name": "Class 9", "title": "NCERT Official Textbooks - Class 9", "url": "https://ncert.nic.in/textbook.php?iesc1=0-12"},
@@ -389,12 +395,25 @@ def admin_dashboard():
     teachers = User.query.filter_by(role='teacher').all()
     students = User.query.filter_by(role='student').all()
     notices = Notice.query.order_by(Notice.created_at.desc()).all()
+    fee_records = FeeRecord.query.order_by(FeeRecord.id.desc()).all()
+
+    total_paid_amount = sum(f.amount for f in fee_records if f.status == 'Paid')
+    total_pending_amount = sum(f.amount for f in fee_records if f.status == 'Pending')
+    paid_count = sum(1 for f in fee_records if f.status == 'Paid')
+    pending_count = sum(1 for f in fee_records if f.status == 'Pending')
+
     return render_template(
         'admin_dashboard.html',
         classes=CLASSES_7_TO_12,
+        months=MONTH_OPTIONS,
         teachers=teachers,
         students=students,
         notices=notices,
+        fee_records=fee_records,
+        total_paid_amount=total_paid_amount,
+        total_pending_amount=total_pending_amount,
+        paid_count=paid_count,
+        pending_count=pending_count,
         ncert_links=NCERT_OFFICIAL_LINKS
     )
 
@@ -454,6 +473,51 @@ def add_notice():
     db.session.add(notice)
     db.session.commit()
     flash('Announcement published to portal!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/admin/add_fee', methods=['POST'])
+@login_required
+@role_required('admin')
+def add_fee():
+    student_id = int(request.form.get('student_id'))
+    fee_month = request.form.get('fee_month', '').strip() or 'November 2026'
+    months_covered = max(1, int(request.form.get('months_covered', 1)))
+    amount = max(0.0, float(request.form.get('amount', 0)))
+    status = request.form.get('status', 'Pending')
+    if status not in ('Paid', 'Pending'):
+        status = 'Pending'
+    remarks = request.form.get('remarks', '').strip()
+
+    rec = FeeRecord(
+        student_id=student_id,
+        fee_month=fee_month,
+        months_covered=months_covered,
+        amount=amount,
+        status=status,
+        due_date=date.today() + timedelta(days=10) if status == 'Pending' else None,
+        paid_date=date.today() if status == 'Paid' else None,
+        remarks=remarks
+    )
+    db.session.add(rec)
+    db.session.commit()
+    flash(f'Fee record ({status} - {fee_month}, {months_covered} mo) saved!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/admin/toggle_fee/<int:fee_id>', methods=['POST'])
+@login_required
+@role_required('admin')
+def toggle_fee(fee_id):
+    rec = db.get_or_404(FeeRecord, fee_id)
+    if rec.status == 'Paid':
+        rec.status = 'Pending'
+        rec.paid_date = None
+    else:
+        rec.status = 'Paid'
+        rec.paid_date = date.today()
+    db.session.commit()
+    flash(f'Fee status updated to {rec.status} for {rec.fee_month}.', 'success')
     return redirect(url_for('admin_dashboard'))
 
 
@@ -879,6 +943,14 @@ def student_dashboard():
     if not available_exams:
         available_exams = OnlineExam.query.order_by(OnlineExam.created_at.desc()).all()
 
+    fee_records = FeeRecord.query.filter_by(student_id=current_user.id).order_by(FeeRecord.id.desc()).all()
+    paid_fees = [f for f in fee_records if f.status == 'Paid']
+    pending_fees = [f for f in fee_records if f.status == 'Pending']
+    paid_months_total = sum(f.months_covered for f in paid_fees)
+    pending_months_total = sum(f.months_covered for f in pending_fees)
+    paid_amount_total = sum(f.amount for f in paid_fees)
+    pending_amount_total = sum(f.amount for f in pending_fees)
+
     attendance_records = Attendance.query.filter_by(student_id=current_user.id).order_by(Attendance.att_date.desc()).all()
     present_days = sum(1 for a in attendance_records if a.status == 'Present')
     total_days = len(attendance_records)
@@ -898,6 +970,13 @@ def student_dashboard():
         scores=scores,
         attempts=attempts,
         available_exams=available_exams,
+        fee_records=fee_records,
+        paid_fees=paid_fees,
+        pending_fees=pending_fees,
+        paid_months_total=paid_months_total,
+        pending_months_total=pending_months_total,
+        paid_amount_total=paid_amount_total,
+        pending_amount_total=pending_amount_total,
         materials=materials,
         doubts=doubts,
         notices=notices,

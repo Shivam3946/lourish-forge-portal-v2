@@ -162,3 +162,19 @@ class ExamAttempt(db.Model):
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     student = db.relationship('User', backref='exam_attempts')
+
+
+class FeeRecord(db.Model):
+    __tablename__ = 'fee_records'
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    fee_month = db.Column(db.String(30), nullable=False)  # e.g., 'November 2026'
+    months_covered = db.Column(db.Integer, nullable=False, default=1)  # kitne month ki fees
+    amount = db.Column(db.Float, nullable=False, default=0.0)
+    status = db.Column(db.String(20), nullable=False, default='Pending')  # 'Paid' or 'Pending'
+    due_date = db.Column(db.Date, nullable=True)
+    paid_date = db.Column(db.Date, nullable=True)
+    remarks = db.Column(db.String(200), nullable=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    student = db.relationship('User', backref='fee_records')

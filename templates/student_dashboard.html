@@ -7,6 +7,64 @@
   <small>Class: <strong>{{ current_user.student_class or 'CBSE' }}</strong> &bull; Batch: <strong>{{ current_user.batch_timing or 'Regular' }}</strong> &bull; Attendance: <strong>{{ att_pct }}%</strong> ({{ present_days }}/{{ total_days }})</small>
 </div>
 
+<!-- Fee & Payment Status (Student) -->
+<div class="card shadow-sm mb-4 animate-in">
+  <div class="card-header bg-info text-dark fw-bold">My Fee &amp; Payment Status (Paid / Pending &amp; Months)</div>
+  <div class="card-body">
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <div class="border rounded p-3 bg-white">
+          <div class="small text-muted">Paid Fees (Deni/Hone Wali Fees Paid)</div>
+          <h4 class="text-success fw-bold mb-1">&#8377;{{ paid_amount_total }} <span class="badge bg-success">{{ paid_months_total }} Month(s) Paid</span></h4>
+          <div class="small">
+            <strong>Paid Months:</strong>
+            {% if paid_fees %}
+              {{ paid_fees | map(attribute='fee_month') | join(', ') }}
+            {% else %}
+              None yet
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="border rounded p-3 bg-white">
+          <div class="small text-muted">Pending Fees (Deni Hai / Pending)</div>
+          <h4 class="text-danger fw-bold mb-1">&#8377;{{ pending_amount_total }} <span class="badge bg-danger">{{ pending_months_total }} Month(s) Pending</span></h4>
+          <div class="small">
+            <strong>Pending Months:</strong>
+            {% if pending_fees %}
+              {{ pending_fees | map(attribute='fee_month') | join(', ') }}
+            {% else %}
+              No pending fees
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-sm table-striped align-middle mb-0">
+        <thead>
+          <tr><th>Month (Kaunsi Month)</th><th>Months (Kitne)</th><th>Amount</th><th>Status</th><th>Date Info</th></tr>
+        </thead>
+        <tbody>
+          {% for fr in fee_records %}
+          <tr>
+            <td><strong>{{ fr.fee_month }}</strong></td>
+            <td>{{ fr.months_covered }} Month(s)</td>
+            <td>&#8377;{{ fr.amount }}</td>
+            <td><span class="badge bg-{{ 'success' if fr.status == 'Paid' else 'danger' }}">{{ fr.status }}</span></td>
+            <td class="small">{{ 'Paid on ' ~ fr.paid_date if fr.status == 'Paid' else ('Due by ' ~ fr.due_date) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="text-muted text-center">No fee records available yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 {% if notices %}
 <div class="card shadow-sm mb-4 border-warning animate-in">
   <div class="card-header bg-warning text-dark fw-bold">Latest Notices &amp; Batch Announcements</div>

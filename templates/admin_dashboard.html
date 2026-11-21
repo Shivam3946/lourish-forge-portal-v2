@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Director Dashboard - Flourish Forge{% endblock %}
+{% block content %}
+<div class="welcome-hero p-4 mb-4 d-flex flex-wrap justify-content-between align-items-center shadow-sm">
+  <div>
+    <span class="badge bg-warning text-dark mb-1">Director Control Panel</span>
+    <h3 class="mb-0 fw-bold">Welcome, {{ current_user.name }}</h3>
+    <small>B.Sc. (Hons.) Computer Science, University of Delhi | CBSE Classes 7&ndash;12</small>
+  </div>
+  <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-light btn-sm fw-bold mt-2 mt-md-0">Open Faculty Workspace &rarr;</a>
+</div>
+
+<div class="row g-3 mb-4 animate-in">
+  <div class="col-md-6">
+    <div class="card text-bg-primary shadow-sm"><div class="card-body"><h6>Total Students (Classes 7&ndash;12)</h6><h3 class="mb-0">{{ students|length }}</h3></div></div>
+  </div>
+  <div class="col-md-6">
+    <div class="card text-bg-info text-dark shadow-sm"><div class="card-body"><h6>Faculty / Teachers</h6><h3 class="mb-0">{{ teachers|length }}</h3></div></div>
+  </div>
+</div>
+
+<div class="row g-4 animate-in animate-delay-1">
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-bold">Enroll Student (Class 7&ndash;12) / Add Teacher</div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('add_user') }}">
+          <div class="mb-2"><input type="text" name="name" class="form-control" placeholder="Full Name" required></div>
+          <div class="mb-2"><input type="email" name="email" class="form-control" placeholder="Email Address" required></div>
+          <div class="mb-2"><input type="password" name="password" class="form-control" placeholder="Initial Password" required></div>
+          <div class="mb-2">
+            <select name="role" class="form-select" required>
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+            </select>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <select name="student_class" class="form-select">
+                <option value="">Class (7&ndash;12)</option>
+                {% for cls in classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-6">
+              <input type="text" name="batch_timing" class="form-control" placeholder="Batch Timing (e.g. 4-5 PM)">
+            </div>
+          </div>
+          <div class="mb-3"><input type="text" name="subject_specialty" class="form-control" placeholder="Teacher Subject (e.g. Maths, Science)"></div>
+          <button type="submit" class="btn btn-primary w-100">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-bold">Official NCERT Books Direct Links</div>
+      <div class="card-body">
+        <ul class="list-group">
+          {% for nl in ncert_links %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div><strong>{{ nl.title }}</strong> <span class="badge bg-secondary ms-1">{{ nl.class_name }}</span></div>
+            <a href="{{ nl.url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success">Open NCERT &rarr;</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-1 animate-in animate-delay-2">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold">Reset User Password</div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('reset_password') }}" class="row g-2">
+          <div class="col-7">
+            <select name="user_id" class="form-select" required>
+              <option value="">Select Student / Teacher</option>
+              {% for s in students %}<option value="{{ s.id }}">{{ s.name }} (Student - {{ s.student_class }})</option>{% endfor %}
+              {% for t in teachers %}<option value="{{ t.id }}">{{ t.name }} (Teacher)</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-5">
+            <input type="text" name="new_password" class="form-control" placeholder="New Password" required>
+          </div>
+          <div class="col-12 mt-2">
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100">Reset Credentials</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold">Publish Notice / Batch Announcement</div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('add_notice') }}">
+          <div class="row g-2 mb-2">
+            <div class="col-7"><input type="text" name="title" class="form-control form-control-sm" placeholder="Notice Title" required></div>
+            <div class="col-5">
+              <select name="target_class" class="form-select form-select-sm">
+                <option value="All Classes">All Classes (7&ndash;12)</option>
+                {% for cls in classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <input type="text" name="message" class="form-control form-control-sm" placeholder="Announcement message..." required>
+            <button type="submit" class="btn btn-dark btn-sm">Post</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

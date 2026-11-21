@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Flourish Forge{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    @keyframes fadeSlideUp {
+      0% { opacity: 0; transform: translateY(18px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes welcomeBannerShimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes welcomeOverlayFadeOut {
+      0% { opacity: 1; visibility: visible; }
+      78% { opacity: 1; visibility: visible; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+    @keyframes pulseBadge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .welcome-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a, #0d9488);
+      background-size: 200% 200%;
+      animation: welcomeBannerShimmer 3s ease infinite, welcomeOverlayFadeOut 1.8s ease forwards;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .welcome-splash h1 {
+      font-weight: 800;
+      letter-spacing: 1px;
+      animation: fadeSlideUp 0.6s ease-out;
+    }
+    .welcome-splash p {
+      opacity: 0.92;
+      animation: fadeSlideUp 0.85s ease-out;
+    }
+    .welcome-hero {
+      background: linear-gradient(120deg, #0f172a, #1d4ed8, #0f766e);
+      background-size: 200% 200%;
+      animation: welcomeBannerShimmer 8s ease infinite, fadeSlideUp 0.65s ease-out;
+      color: #ffffff;
+      border-radius: 0.75rem;
+    }
+    .animate-in {
+      animation: fadeSlideUp 0.6s ease-out both;
+    }
+    .animate-delay-1 { animation-delay: 0.1s; }
+    .animate-delay-2 { animation-delay: 0.2s; }
+    .animate-delay-3 { animation-delay: 0.3s; }
+    .pulse-pill {
+      display: inline-block;
+      animation: pulseBadge 2.4s infinite ease-in-out;
+    }
+    @media print {
+      .no-print, .welcome-splash { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+  <!-- Welcoming Entrance Animation Overlay -->
+  <div id="welcomeSplash" class="welcome-splash no-print">
+    <span class="badge bg-warning text-dark mb-2 px-3 py-2 rounded-pill fw-bold">WELCOME TO FLOURISH FORGE</span>
+    <h1 class="display-5 mb-2">Igniting Academic Excellence</h1>
+    <p class="lead mb-0">CBSE Classes 7&ndash;12 &bull; Director: Shivam Tiwari, B.Sc. (Hons.) Computer Science, University of Delhi</p>
+  </div>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark no-print shadow-sm">
+    <div class="container">
+      <div>
+        <a class="navbar-brand fw-bold" href="#">FLOURISH FORGE</a>
+        <div class="text-light small">Director: Shivam Tiwari | B.Sc. (Hons.) Computer Science, University of Delhi</div>
+      </div>
+      {% if current_user.is_authenticated %}
+      <div class="d-flex align-items-center gap-3 text-white">
+        <span class="badge bg-primary text-uppercase">{{ current_user.role }}</span>
+        <span class="small">{{ current_user.name }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light">Logout</a>
+      </div>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="container my-4 flex-grow-1">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show no-print animate-in" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="bg-dark text-light py-3 mt-auto no-print">
+    <div class="container text-center small">
+      <strong>Flourish Forge</strong> (CBSE Classes 7&ndash;12) &bull; Director: <strong>Shivam Tiwari</strong>, B.Sc. (Hons.) Computer Science, University of Delhi
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (function () {
+      const splash = document.getElementById('welcomeSplash');
+      if (!splash) return;
+      if (sessionStorage.getItem('ff_welcomed')) {
+        splash.style.display = 'none';
+      } else {
+        sessionStorage.setItem('ff_welcomed', '1');
+        setTimeout(() => { splash.style.display = 'none'; }, 1850);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Edit Question - Flourish Forge{% endblock %}
+{% block content %}
+<div class="row justify-content-center animate-in">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span class="fw-bold">Edit Question #{{ q.id }} &mdash; Flourish Forge Question Bank</span>
+        <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-sm btn-outline-light">&larr; Back</a>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Class</label>
+              <select name="target_class" class="form-select form-select-sm" required>
+                {% for cls in classes %}
+                  <option value="{{ cls }}" {% if q.target_class == cls %}selected{% endif %}>{{ cls }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Question Type</label>
+              <select name="question_type" id="editQType" class="form-select form-select-sm" onchange="toggleEditMcq()">
+                <option value="Subjective" {% if q.question_type == 'Subjective' %}selected{% endif %}>Subjective</option>
+                <option value="MCQ" {% if q.question_type == 'MCQ' %}selected{% endif %}>MCQ (4 Options)</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Difficulty</label>
+              <select name="difficulty" class="form-select form-select-sm">
+                <option value="Easy" {% if q.difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+                <option value="Medium" {% if q.difficulty == 'Medium' %}selected{% endif %}>Medium</option>
+                <option value="HOTS" {% if q.difficulty == 'HOTS' %}selected{% endif %}>HOTS</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">Marks</label>
+              <input type="number" name="marks" value="{{ q.marks }}" min="1" class="form-control form-control-sm" required>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Subject</label>
+              <input type="text" name="subject" value="{{ q.subject }}" class="form-control form-control-sm" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Chapter</label>
+              <input type="text" name="chapter" value="{{ q.chapter }}" class="form-control form-control-sm" required>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label small fw-bold">Question Text</label>
+            <textarea name="question_text" rows="3" class="form-control form-control-sm" required>{{ q.question_text }}</textarea>
+          </div>
+
+          <div id="editMcqFields" class="row g-2 mb-2 {% if q.question_type != 'MCQ' %}d-none{% endif %}">
+            <div class="col-md-6"><input type="text" name="option_a" value="{{ q.option_a or '' }}" class="form-control form-control-sm" placeholder="Option (A)"></div>
+            <div class="col-md-6"><input type="text" name="option_b" value="{{ q.option_b or '' }}" class="form-control form-control-sm" placeholder="Option (B)"></div>
+            <div class="col-md-6"><input type="text" name="option_c" value="{{ q.option_c or '' }}" class="form-control form-control-sm" placeholder="Option (C)"></div>
+            <div class="col-md-6"><input type="text" name="option_d" value="{{ q.option_d or '' }}" class="form-control form-control-sm" placeholder="Option (D)"></div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Correct Answer / Marking Scheme</label>
+            <input type="text" name="answer_key" value="{{ q.answer_key or '' }}" class="form-control form-control-sm">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function toggleEditMcq() {
+    const isMcq = document.getElementById('editQType').value === 'MCQ';
+    document.getElementById('editMcqFields').classList.toggle('d-none', !isMcq);
+  }
+</script>
+{% endblock %}

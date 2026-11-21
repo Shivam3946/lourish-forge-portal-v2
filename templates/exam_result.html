@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Exam Result - Flourish Forge{% endblock %}
+{% block content %}
+<div class="card shadow-sm mx-auto animate-in" style="max-width: 680px;">
+  <div class="card-header bg-success text-white text-center">
+    <h4 class="mb-0">Auto-Generated Examination Result</h4>
+    <small>{{ attempt.exam.title }} ({{ attempt.exam.target_class }} &bull; {{ attempt.exam.subject }})</small>
+  </div>
+  <div class="card-body p-4 text-center">
+    <h2 class="fw-bold text-primary">{{ attempt.score }} / {{ attempt.total_marks }}</h2>
+    <p class="lead">Accuracy: <strong>{{ attempt.percentage }}%</strong> ({{ attempt.correct_count }} / {{ attempt.total_questions }} MCQs Correct)</p>
+    <div class="alert alert-info text-start small">
+      <strong>Performance Report:</strong>
+      {% if attempt.percentage >= 80 %}
+        Excellent mastery on "{{ attempt.exam.chapter }}". Ready for higher-difficulty / board-level practice.
+      {% elif attempt.percentage >= 50 %}
+        Good progress on "{{ attempt.exam.chapter }}". Revise missed MCQs to push above 80%.
+      {% else %}
+        Needs focused revision on "{{ attempt.exam.chapter }}". Re-read NCERT textbook and re-attempt practice MCQs.
+      {% endif %}
+    </div>
+    <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary">Back to Student Dashboard &amp; Performance</a>
+  </div>
+</div>
+{% endblock %}

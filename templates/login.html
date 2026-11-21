@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Login - Flourish Forge{% endblock %}
+{% block content %}
+<div class="welcome-hero p-4 mb-4 text-center shadow-sm">
+  <span class="badge bg-warning text-dark mb-2 pulse-pill">Welcome to Flourish Forge</span>
+  <h2 class="fw-bold mb-1">Smart Learning, Practice &amp; Assessment Portal</h2>
+  <p class="mb-0 small">CBSE Classes 7&ndash;12 | Director: Shivam Tiwari (B.Sc. (Hons.) Computer Science, University of Delhi)</p>
+</div>
+
+<div class="row justify-content-center mt-3 animate-in animate-delay-1">
+  <div class="col-md-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-primary text-white text-center py-3">
+        <h4 class="mb-0">Portal Sign In</h4>
+        <small>Enter your registered email and password</small>
+      </div>
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Email Address</label>
+            <input type="email" name="email" class="form-control" required placeholder="name@example.com">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Password</label>
+            <input type="password" name="password" class="form-control" required placeholder="Enter password">
+          </div>
+          <button type="submit" class="btn btn-primary w-100 fw-semibold">Sign In</button>
+        </form>
+        <div class="text-center mt-3">
+          <a href="{{ url_for('forgot_password') }}" class="small text-decoration-none">Forgot Password? Reset via Email OTP</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
